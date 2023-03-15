@@ -26,7 +26,7 @@ For more information on connectivity options, see [Accessing a Private Only API 
 
 ## AKS network access to the API server
 
-There are two options to secure network access to the Kubernetes API in AKS, a private AKS cluster or authorized IP ranges.
+There are three options to secure network access to the Kubernetes API in AKS, a private AKS cluster, authorized IP ranges or API VNet integration.
 
 ### Private AKS cluster
 
@@ -100,9 +100,17 @@ The following `az aks update` Azure CLI command authorizes IP ranges:
       --api-server-authorized-ip-ranges  73.140.245.0/24
   ```
 
+### API Server VNet integration
+
+The third and most recent option to secure the [API of an Azure Kubernetes Service (AKS)](/azure/aks/api-server-vnet-integration) cluster is to configure the API Server VNet Integration that projects the API server endpoint directly into an Azure subnet within AKS cluster VNet. This options allows direct communication between API and nodes without any tunneling or private links. The API sits behind an Azure Load Balancer that has a private IP address so there is no need of using DNS and all node-API traffic is completely private without leaving the VNet. By using an Load Balancer you also have the option to associate a public IP address to it to support a public cluster, this public access to the API can be added or removed even after the cluster is provisioned which gives greater flexibility.
+
 ## AKS connectivity considerations
 
-- An AKS private cluster provides higher security and isolation than authorized IPs. However, you can't convert an existing public AKS cluster into a private cluster. You can enable authorized IPs for any existing AKS cluster.
+- An AKS private cluster provides higher security and isolation than authorized IPs. However, you can't convert an existing public AKS cluster into a private cluster, if you require such flexibility opt for API Server VNet integration. You can enable authorized IPs for any existing AKS cluster.
+
+- Existing AKS private clusters cannot be converted into API Server VNet integration cluster. Existing public clysters can be converted to use VNEt integration.
+
+- Even though an API Server VNet integration AKS cluster is behind a Load Balancer, it will not work with a Private Link Service.
 
 - You can't apply authorized IP ranges to a private API server endpoint. Authorized IPs apply only to the public API server.
 
