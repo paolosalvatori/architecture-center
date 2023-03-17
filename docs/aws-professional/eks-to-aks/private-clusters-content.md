@@ -102,7 +102,23 @@ The following `az aks update` Azure CLI command authorizes IP ranges:
 
 ### API Server VNet integration
 
-The third and most recent option to secure the [API of an Azure Kubernetes Service (AKS)](/azure/aks/api-server-vnet-integration) cluster is to configure the API Server VNet Integration that projects the API server endpoint directly into an Azure subnet within AKS cluster VNet. This options allows direct communication between API and nodes without any tunneling or private links. The API sits behind an Azure Load Balancer that has a private IP address so there is no need of using DNS and all node-API traffic is completely private without leaving the VNet. By using an Load Balancer you also have the option to associate a public IP address to it to support a public cluster, this public access to the API can be added or removed even after the cluster is provisioned which gives greater flexibility.
+The third option to secure access to the API Server of an Azure Kubernetes Service (AKS) cluster is to configure the [API Server VNet Integration](/azure/aks/api-server-vnet-integration) that projects the API server endpoint directly into an Azure subnet within the AKS cluster virtual network. This feature enables network communication between the API server and the cluster nodes without the need for private link or tunnel. 
+
+The control plane or API server is in an Azure Kubernetes Service (AKS)-managed Azure subscription. A customer's cluster or node pool is in the customer's subscription. The API server and the cluster nodes can communicate with each other through the API server VIP and pod IPs that are projected into the API Server delegated subnet.
+
+API Server VNet Integration is supported for public or private clusters, and public access can be added or removed after cluster provisioning. For more information, see:
+
+- [Convert an existing AKS cluster to API Server VNet Integration](/azure/aks/api-server-vnet-integration#convert-an-existing-aks-cluster-to-api-server-vnet-integration)
+- [Enable or disable private cluster mode on an existing cluster with API Server VNet Integration](/azure/aks/api-server-vnet-integration#enable-or-disable-private-cluster-mode-on-an-existing-cluster-with-api-server-vnet-integration)
+
+Unlike non-VNet integrated clusters, the agent nodes always communicate directly with the private IP address of the API Server Internal Load Balancer (ILB) IP without using DNS. The Internal Load Balancer is called `kube-apiserver` and is created in the [node resource group](https://learn.microsoft.com/en-us/azure/aks/faq#why-are-two-resource-groups-created-with-aks), which contains all of the infrastructure resources associated with the cluster. 
+
+![API Server VNet Integration](https://raw.githubusercontent.com/Azure-Samples/aks-api-server-vnet-integration-bicep/main/images/architecture.png)
+
+All node to API server traffic is kept on private networking and no tunnel is required for API server to node connectivity. Out-of-cluster clients needing to communicate with the API server can do so normally if public network access is enabled. If public network access is disabled, they should follow the same private DNS setup methodology as standard [private clusters](private-clusters.md). For more information, see:
+
+- [Create an Azure Kubernetes Service cluster with API Server VNet Integration](https://learn.microsoft.com/en-us/azure/aks/api-server-vnet-integration)
+- [Create an Azure Kubernetes Service (AKS) cluster with API Server VNET Integration using Bicep](https://github.com/Azure-Samples/aks-api-server-vnet-integration-bicep)
 
 ## AKS connectivity considerations
 
